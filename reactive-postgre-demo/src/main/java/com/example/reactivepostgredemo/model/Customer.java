@@ -1,12 +1,14 @@
 package com.example.reactivepostgredemo.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Table
-@Data
+@Getter
+@Setter
 public class Customer {
 
     @Id

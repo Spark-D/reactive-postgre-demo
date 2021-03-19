@@ -1,13 +1,9 @@
 package com.example.reactivepostgredemo.controller;
 
-import com.example.reactivepostgredemo.model.Customer;
 import com.example.reactivepostgredemo.model.Todo;
 import com.example.reactivepostgredemo.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +25,7 @@ public class TodoController {
     }
 
     @GetMapping("/{task_no}")
-    public Mono<Todo> getTodoItem(@PathVariable Integer task_no){
+    public Mono<Todo> getTodoItem(@PathVariable String task_no){
         return todoRepository.findById(task_no);
     }
 
@@ -41,5 +37,10 @@ public class TodoController {
                     return t;
                 }).flatMap(t-> todoRepository.save(t));
     }
+
+//    @GetMapping("comments/{task_no}")
+//    public Flux<Todo> getTodoComments(@PathVariable String task_no){
+//        return todoRepository.findAllComments(task_no);
+//    }
 
 }

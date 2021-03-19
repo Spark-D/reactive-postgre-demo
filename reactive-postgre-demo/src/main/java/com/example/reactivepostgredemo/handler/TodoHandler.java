@@ -1,6 +1,8 @@
 package com.example.reactivepostgredemo.handler;
 
+import com.example.reactivepostgredemo.model.Comment;
 import com.example.reactivepostgredemo.model.Todo;
+import com.example.reactivepostgredemo.repository.CommentRepository;
 import com.example.reactivepostgredemo.repository.TodoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,9 +13,6 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
 
 @Component
 public class TodoHandler {
@@ -21,23 +20,26 @@ public class TodoHandler {
     @Autowired
     TodoRepository todoRepository;
 
+    @Autowired
+    CommentRepository commentRepository;
+
     @CrossOrigin
-    public Mono<ServerResponse> findAll(ServerRequest serverRequest){
+    public Mono<ServerResponse> findAll(ServerRequest serverRequest) {
         Flux<Todo> todoFlux = todoRepository.findAll();
 
         return ServerResponse.ok()
                 .body(todoFlux, Todo.class);
     }
 
-    public Mono<ServerResponse> findById(ServerRequest serverRequest){
-        Integer task_no = Integer.valueOf(serverRequest.pathVariable("task_no"));
+    public Mono<ServerResponse> findById(ServerRequest serverRequest) {
+        String task_no = serverRequest.pathVariable("task_no");
 
         return todoRepository.findById(task_no)
                 .flatMap(todo -> ServerResponse.ok().bodyValue(todo))
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
-    public Mono<ServerResponse> save(ServerRequest serverRequest){
+    public Mono<ServerResponse> save(ServerRequest serverRequest) {
         System.out.println("repo save!!!!!!!!!!!!!!");
         Mono<Todo> todoMono = serverRequest.bodyToMono(Todo.class)
                 .flatMap(todoRepository::save);
@@ -45,8 +47,8 @@ public class TodoHandler {
         return ServerResponse.status(HttpStatus.CREATED).body(todoMono, Todo.class);
     }
 
-    public Mono<ServerResponse> update(ServerRequest serverRequest){
-        Integer task_no = Integer.valueOf(serverRequest.pathVariable("task_no"));
+    public Mono<ServerResponse> update(ServerRequest serverRequest) {
+        String task_no = serverRequest.pathVariable("task_no");
 
         return todoRepository.findById(task_no)
                 .flatMap(todo -> {
@@ -57,7 +59,7 @@ public class TodoHandler {
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 
-    public Mono<ServerResponse> delete(ServerRequest serverRequest){
+    public Mono<ServerResponse> delete(ServerRequest serverRequest) {
         Integer task_no = Integer.valueOf(serverRequest.pathVariable("task_no"));
 
         return todoRepository.findById(task_no)
@@ -66,5 +68,39 @@ public class TodoHandler {
                     return ServerResponse.ok().body(delete, Void.class);
                 })
                 .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<Todo> findTodoComments(ServerRequest serverRequest) {
+        String task_no = serverRequest.pathVariable("task_no");
+        Mono<Todo> todoMono = todoRepository.findById(task_no).cache();
+        Flux<Comment> commentFlux = commentRepository.findCommentsByTodoNo(task_no).cache();
+
+        return todoMono.zipWith(commentFlux.collectList())
+                .map(combine -> combine.getT1().withCommentList(combine.getT2()));
+    }
+
+    public Mono<ServerResponse> getTodoWithComments(ServerRequest serverRequest) {
+        Mono<Todo> todoMono = this.findTodoComments(serverRequest).log();
+
+        return ServerResponse.ok()
+                .body(todoMono, Todo.class);
+    }
+
+    public Flux<Todo> findTodoListComments(ServerRequest serverRequest) {
+//        Flux<Todo> todoListAll = todoRepository.findAll().log();
+        Flux<Todo> todoAllListWithComments = todoRepository.findAll().cache().flatMap(t ->
+                Mono.just(t)
+                        .zipWith(commentRepository.findCommentsByTodoNo(t.getTask_no()).cache().collectList())
+                        .map(combine -> combine.getT1().withCommentList(combine.getT2())).log()
+        );
+
+        return todoAllListWithComments;
+    }
+
+    public Mono<ServerResponse> getAllWithComments(ServerRequest serverRequest) {
+        Flux<Todo> todoWithCommentsList = this.findTodoListComments(serverRequest);
+
+        return ServerResponse.ok()
+                .body(todoWithCommentsList, Todo.class);
     }
 }

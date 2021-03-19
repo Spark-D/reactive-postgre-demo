@@ -2,15 +2,11 @@ package com.example.reactivepostgredemo.router;
 
 import com.example.reactivepostgredemo.handler.SampleHandler;
 import com.example.reactivepostgredemo.handler.TodoHandler;
-import com.example.reactivepostgredemo.model.Todo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.netty.transport.ServerTransport;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
@@ -41,14 +37,23 @@ public class SampleRouter {
     public RouterFunction<ServerResponse> todoRoute(TodoHandler handler){
         //Nested Routes 라우터 펑션을 그룹핑 중복 코드를 줄임
         return RouterFunctions.route()
-                .path("/functionaltodo", b1 -> b1
-                        .nest(accept(APPLICATION_JSON), b2 -> b2
-                                .GET("/", handler::findAll)
-                                .GET("/{task_no}", handler::findById)
-                                .POST("/", handler::save)
-                                .PUT("/{task_no}", handler::update)
-                                .DELETE("/{task_no}", handler::delete)
-                        ))
+                .GET("/functionaltodo", accept(APPLICATION_JSON), handler::findAll)
+                .GET("functionaltodo/withComment", accept(APPLICATION_JSON), handler::getAllWithComments)
+                .GET("functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::findById)
+                .GET("functionaltodo/withComment/{task_no}", accept(APPLICATION_JSON), handler::getTodoWithComments)
+                .POST("functionaltodo/", accept(APPLICATION_JSON), handler::save)
+                .PUT("functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::update)
+                .DELETE("functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::delete)
+//                .path("/functionaltodo", b1 -> b1
+//                        .nest(accept(APPLICATION_JSON), b2 -> b2
+//                                .GET("/", handler::findAll)
+//                                .GET("/{task_no}", handler::findById)
+//                                .GET("/withComment/{task_no}", handler::getTodoWithComments)
+//                                .GET("/withComment", handler::getAllWithComments)
+//                                .POST("/", handler::save)
+//                                .PUT("/{task_no}", handler::update)
+//                                .DELETE("/{task_no}", handler::delete)
+//                        ))
                 .build();
     }
 
