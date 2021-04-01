@@ -2,8 +2,11 @@ package com.example.reactivepostgredemo.handler;
 
 import com.example.reactivepostgredemo.model.Comment;
 import com.example.reactivepostgredemo.model.Todo;
+import com.example.reactivepostgredemo.model.TodoDto;
+import com.example.reactivepostgredemo.model.TodoProjection;
 import com.example.reactivepostgredemo.repository.CommentRepository;
 import com.example.reactivepostgredemo.repository.TodoRepository;
+import com.example.reactivepostgredemo.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,6 +25,9 @@ public class TodoHandler {
 
     @Autowired
     CommentRepository commentRepository;
+
+    @Autowired
+    TodoService todoService;
 
     @CrossOrigin
     public Mono<ServerResponse> findAll(ServerRequest serverRequest) {
@@ -60,7 +66,7 @@ public class TodoHandler {
     }
 
     public Mono<ServerResponse> delete(ServerRequest serverRequest) {
-        Integer task_no = Integer.valueOf(serverRequest.pathVariable("task_no"));
+        String task_no = serverRequest.pathVariable("task_no");
 
         return todoRepository.findById(task_no)
                 .flatMap(todo -> {
@@ -103,4 +109,19 @@ public class TodoHandler {
         return ServerResponse.ok()
                 .body(todoWithCommentsList, Todo.class);
     }
+
+    public Mono<ServerResponse> getAllByInterface(ServerRequest serverRequest) {
+        Flux<TodoProjection> todoProjectionFlux = todoService.getAllByProjection();
+        return  ServerResponse.ok()
+                .body(todoProjectionFlux, TodoProjection.class);
+    }
+
+    public Mono<ServerResponse> getAllByDto(ServerRequest serverRequest){
+        Flux<TodoDto> todoProjectionFlux = todoService.getAllByDto();
+
+        return ServerResponse.ok()
+                .body(todoProjectionFlux, TodoDto.class);
+    }
+
+
 }

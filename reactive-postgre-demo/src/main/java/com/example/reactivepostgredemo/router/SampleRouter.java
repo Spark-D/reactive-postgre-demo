@@ -30,6 +30,7 @@ public class SampleRouter {
                 .POST("/sample", accept(APPLICATION_JSON), handler::save)
                 .PUT("/sample/{id}", accept(APPLICATION_JSON), handler::update)
                 .DELETE("/sample/{id}", accept(APPLICATION_JSON), handler::delete)
+                .GET("sample/{id}/{name}", accept(APPLICATION_JSON), handler::getCompositeKeyCustomer)
                 .build();
     }
 
@@ -38,12 +39,14 @@ public class SampleRouter {
         //Nested Routes 라우터 펑션을 그룹핑 중복 코드를 줄임
         return RouterFunctions.route()
                 .GET("/functionaltodo", accept(APPLICATION_JSON), handler::findAll)
-                .GET("functionaltodo/withComment", accept(APPLICATION_JSON), handler::getAllWithComments)
-                .GET("functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::findById)
-                .GET("functionaltodo/withComment/{task_no}", accept(APPLICATION_JSON), handler::getTodoWithComments)
-                .POST("functionaltodo/", accept(APPLICATION_JSON), handler::save)
-                .PUT("functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::update)
-                .DELETE("functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::delete)
+                .GET("/functionaltodo/interface-projection", accept(APPLICATION_JSON), handler::getAllByInterface)
+                .GET("/functionaltodo/dtoProjection", accept(APPLICATION_JSON), handler::getAllByDto)
+                .GET("/functionaltodo/withComment/{task_no}", accept(APPLICATION_JSON), handler::getTodoWithComments)
+                .GET("/functionaltodo/withComment", accept(APPLICATION_JSON), handler::getAllWithComments)
+                .GET("/functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::findById)
+                .PUT("/functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::update)
+                .DELETE("/functionaltodo/{task_no}", accept(APPLICATION_JSON), handler::delete)
+                .POST("/functionaltodo/", accept(APPLICATION_JSON), handler::save)
 //                .path("/functionaltodo", b1 -> b1
 //                        .nest(accept(APPLICATION_JSON), b2 -> b2
 //                                .GET("/", handler::findAll)

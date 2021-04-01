@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class Comment {
+
     @Id
     private Integer comment_no;
     private String task_no;

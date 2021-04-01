@@ -38,8 +38,10 @@ public class GlobalWebConfig implements WebFluxConfigurer {
         // Possibly...
         // config.applyPermitDefaultValues()
 
-        config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:8081");
+//        config.addAllowedOrigin("http://localhost:8081");
+//        config.setAllowCredentials(true);
+        // AllowCredentials을 true로 지정할 시 AllowedOrigin는 *를 받을 수 없다. private location만 적용 가능.
+        config.addAllowedOrigin("*");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 

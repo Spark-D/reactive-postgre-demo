@@ -21,6 +21,7 @@ public class CallbackConfig implements BeforeSaveCallback<Todo>, BeforeConvertCa
     @Autowired
     TodoRepository todoRepository;
 
+
     public Publisher<Todo> onBeforeConvert(Todo todo, SqlIdentifier table) {
         System.out.println("onBeforeConvert!!!!!!!!!!!!!!!!"+ table);
         if (todo.getTask_no() == null || todo.getTask_no() == "") {
@@ -42,11 +43,6 @@ public class CallbackConfig implements BeforeSaveCallback<Todo>, BeforeConvertCa
         return todo;
     }
 
-//    public Publisher<Todo> onBeforeSave(Todo todo, OutboundRow row, SqlIdentifier table) {
-//        System.out.println("onBeforeSave!!!!!!!!!!!!!!!!" + todo.toString());
-//        System.out.println("onBeforeSave!!!!!!!!!!!!!!!!" + row);
-//        System.out.println("onBeforeSave!!!!!!!!!!!!!!!!" + table);
-//        return null;
-//    }
+
 
 }

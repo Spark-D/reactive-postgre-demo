@@ -1,7 +1,9 @@
 package com.example.reactivepostgredemo.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -9,12 +11,13 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table
 @Getter
 @Setter
-public class Customer {
-
+@AllArgsConstructor
+@ToString
+public class Person {
     @Id
-    private Integer id;
+    private Long id;
     @Column
-    private String name;
-
-
+    private String firstname;
+    @Column
+    private String lastname;
 }

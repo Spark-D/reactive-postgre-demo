@@ -30,7 +30,7 @@ public class TodoController {
     }
 
     @PutMapping("/{task_no}")
-    public Mono<Todo> updateTask(@RequestBody Todo todo, @PathVariable Integer task_no){
+    public Mono<Todo> updateTask(@RequestBody Todo todo, @PathVariable String task_no){
         return todoRepository.findById(task_no)
                 .map(t -> {
                     t.setSubject(todo.getSubject());
