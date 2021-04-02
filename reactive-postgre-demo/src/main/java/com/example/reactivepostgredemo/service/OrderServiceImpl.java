@@ -2,6 +2,7 @@ package com.example.reactivepostgredemo.service;
 
 import com.example.reactivepostgredemo.model.OmOd;
 import com.example.reactivepostgredemo.model.OmOdDtl;
+import com.example.reactivepostgredemo.model.OmOdFvrDtl;
 import com.example.reactivepostgredemo.repository.MyRepository;
 import com.example.reactivepostgredemo.repository.OrderDetailRepository;
 import com.example.reactivepostgredemo.repository.OrderFavorRepository;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -79,44 +81,47 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED , rollbackFor = Exception.class)
     public Mono<OmOd> createOrder(OmOd omOd) {
-        Logger.log("createOrder ::::::::::");
         omOd.setNewOrder(true);
         omOd.setRegDttm(LocalDateTime.now());
         Mono<OmOd> omOdMono = orderRepository.save(omOd)
                 .log("create!!"+ omOd.toString())
-                .flatMap(od -> createOrderDetail(od))
-                .flatMap(od -> createOrderFavor(od));
+                .flatMap(this::createOrderDetail)
+                .flatMap(this::createOrderFavor);
         return omOdMono;
     }
 
     private Mono<OmOd> createOrderDetail(OmOd od) {
 
         Logger.log("createOrderDetail  ::::::::::"+ od.getOdNo());
+        AtomicInteger atomicInteger = new AtomicInteger(1);
         Flux<OmOdDtl> omOdDtl = Flux.fromIterable(od.getOmOdDtlList()).flatMap(dtl -> {
                   dtl.setOdNo(od.getOdNo());
                   dtl.setRegDttm(LocalDateTime.now());
                   dtl.setOdTypCd("10");
                   dtl.setProcSeq(1);
+                  dtl.setOdSeq(atomicInteger.getAndIncrement());
                   dtl.setNewOrder(true);
                   return orderDetailRepository.save(dtl);
                 });
 
-        return Mono.just(od).zipWith(Flux.fromIterable(od.getOmOdDtlList()).collectList())
+        return Mono.just(od).zipWith(omOdDtl.collectList())
                 .map(data -> data.getT1().withOmOdDtlList(data.getT2()));
     }
 
     private Mono<OmOd> createOrderFavor(OmOd od) {
         Logger.log("createOrderFavor  ::::::::::"+ od.getOdNo());
-        od.getOmOdFvrDtlList().stream().map(fvr -> {
+        AtomicInteger atomicInteger = new AtomicInteger(1);
+        Flux<OmOdFvrDtl> omOdFvrDtlFlux =  Flux.fromIterable(od.getOmOdFvrDtlList()).flatMap(fvr -> {
             fvr.setOdNo(od.getOdNo());
             fvr.setProcSeq(1);
+            fvr.setOdSeq(atomicInteger.getAndIncrement());
             fvr.setOdFvrDvsCd("HAPN");
             fvr.setRegDttm(LocalDateTime.now());
             fvr.setNewOrder(true);
-            return fvr;
-        }).map(orderFavorRepository::save);
+            return orderFavorRepository.save(fvr);
+        });
 
-        return Mono.just(od).zipWith(Flux.fromIterable(od.getOmOdFvrDtlList()).collectList())
+        return Mono.just(od).zipWith(omOdFvrDtlFlux.collectList())
                 .map(data -> data.getT1().withOmOdFvrDtlList(data.getT2()));
     }
 
