@@ -1,8 +1,11 @@
 package com.example.reactivepostgredemo.handler;
 
 import com.example.reactivepostgredemo.model.OmOd;
+import com.example.reactivepostgredemo.model.OmOdDtlFvrDtlResponse;
+import com.example.reactivepostgredemo.model.Person;
 import com.example.reactivepostgredemo.repository.OrderDetailRepository;
 import com.example.reactivepostgredemo.repository.OrderRepository;
+import com.example.reactivepostgredemo.repository.TestRepository;
 import com.example.reactivepostgredemo.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,6 +25,9 @@ public class OrderHandler {
 
     @Autowired
     OrderDetailRepository orderDetailRepository;
+
+    @Autowired
+    TestRepository testRepository;
 
     /**
      * 주문기본 전체 조회
@@ -52,6 +58,54 @@ public class OrderHandler {
                 .flatMap(orderService::createOrder);
 
         return ServerResponse.ok().body(omOdMono, OmOd.class)
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> orderJoinList(ServerRequest serverRequest) {
+
+//        Flux<Map<String, Object>> selectPub =
+//                databaseClient.sql("select od_no, odr_nm from om_od")
+//                        .fetch()
+//                        .all();
+//
+//        selectPub.subscribe(m -> {
+//            Logger.log("m.get(odr_nm) : {}", m.get("odr_nm"));
+//        });
+
+
+        Flux<OmOdDtlFvrDtlResponse> result = orderService.getClientData();
+
+
+        return ServerResponse.ok().body(result, OmOdDtlFvrDtlResponse.class)
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> testList(ServerRequest serverRequest) {
+
+//        Flux<String> testMono = testRepository.getStringPerson();
+//
+//        return ServerResponse.ok().body(testMono, String.class)
+//                .switchIfEmpty(ServerResponse.notFound().build());
+
+        Flux<Person> testFlux = testRepository.getPersonList();
+
+        return ServerResponse.ok().body(testFlux, Person.class);
+    }
+
+    public Mono<ServerResponse> orderbifuncList(ServerRequest serverRequest) {
+
+        Flux<OmOdDtlFvrDtlResponse> result = orderService.getClientBifunList();
+
+        return ServerResponse.ok().body(result, OmOdDtlFvrDtlResponse.class)
+                .switchIfEmpty(ServerResponse.notFound().build());
+    }
+
+    public Mono<ServerResponse> orderCancel(ServerRequest serverRequest) {
+
+        Mono<OmOd> result =serverRequest.bodyToMono(OmOd.class)
+                .flatMap(orderService::cancelOrder);
+
+        return ServerResponse.ok().body(result, OmOd.class)
                 .switchIfEmpty(ServerResponse.notFound().build());
     }
 }

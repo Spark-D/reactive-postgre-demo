@@ -1,16 +1,16 @@
 package com.example.reactivepostgredemo.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OmOdDtlFvrDtlResponse implements Serializable  {
-    private static final long serialVersionUID = 9206427824695736116L;
+@Builder
+public class OmOdDtlFvrDtlResponse {
+//    private static final long serialVersionUID = 9206427824695736116L;
 
     private String odNo;
     private String mbNo;
@@ -26,4 +26,5 @@ public class OmOdDtlFvrDtlResponse implements Serializable  {
     private String prNm;
     private String cpnNo;
     private String cpnNm;
+
 }

@@ -19,6 +19,10 @@ public class OrderRouter {
                 .GET("/order", accept(APPLICATION_JSON), handler::getOrderList)
                 .GET("/order/{odNo}", accept(APPLICATION_JSON), handler::getOrderItemByOdNo)
                 .POST("/order", accept(APPLICATION_JSON), handler::createOrder)
+                .GET("/client/projection", accept(APPLICATION_JSON), handler::orderJoinList)
+                .GET("/client/bifunction", accept(APPLICATION_JSON), handler::orderbifuncList)
+                .GET("/client/test", accept(APPLICATION_JSON), handler::testList)
+                .POST("/order/cancel", accept(APPLICATION_JSON), handler::orderCancel)
                 .build();
     }
 }

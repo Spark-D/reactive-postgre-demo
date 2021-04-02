@@ -30,6 +30,7 @@ public class OrderCallbackConfig implements BeforeSaveCallback<OmOd>, BeforeConv
         if (OmOd.getOdNo() == null || OmOd.getOdNo() == "") {
             return orderService.makeOdNo().map(odNo -> {
                 OmOd.setModDttm(LocalDateTime.now());
+                OmOd.setRegDttm(LocalDateTime.now());
                 OmOd.setOdNo(odNo);
                 return OmOd;
             }).log("od_no regist ::::: "+ OmOd.toString());
